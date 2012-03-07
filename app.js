@@ -4,7 +4,9 @@
  */
 
 var express = require('express')
-  , routes = require('./routes');
+  , routes = require('./routes')
+  , mysql=require('mysql')
+  , conf = require('./conf');
 
 var app = module.exports = express.createServer();
 
@@ -12,7 +14,10 @@ var app = module.exports = express.createServer();
 
 app.configure(function(){
   app.set('views', __dirname + '/views');
-  app.set('view engine', 'jade');
+  app.set('view engine', 'ejs');
+  app.set('view options',{
+      layout:false
+  });
   app.use(express.bodyParser());
   app.use(express.methodOverride());
   app.use(app.router);
@@ -27,8 +32,14 @@ app.configure('production', function(){
   app.use(express.errorHandler());
 });
 
-// Routes
+// Setup Mysql Connection
+app.client=mysql.createClient({
+    user:conf['USERNAME'],
+    password:conf['PASSWORD']
+});
+app.client.query('use '+conf['DATABASE_NAME']);
 
+// Routes
 app.get('/', routes.index);
 
 app.listen(3000);

@@ -13,14 +13,15 @@ util.merge=function(toarray, witharray){
 }
 
 Post.test2=function(){
-    async.series([
-        function(callback){
-            db.getBy('id',1,null,null,callback);
-        }],
-        function(err, results){
-            console.log('ww'+results);
+    var rs;
+    function callback(err, results, fields){
+        if (err){
+            console.log(err);
         }
-    );
+        rs=results;
+        console.log(rs);
+    }
+    db.getBy('id',1,null,null,callback);
 }
 
 Post.test = function(){

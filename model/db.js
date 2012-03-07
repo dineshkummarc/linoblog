@@ -1,3 +1,4 @@
+var client=require('../conf');
 var Db = module.exports=function Db(tablename){
     this.tablename=tablename;
     this.results=[];
@@ -9,17 +10,6 @@ util.merge=function(toarray, witharray){
         toarray[k]=witharray[k];
     }
 }
-
-var mysql=require('mysql');
-var DATABASE_NAME='linoblog';
-var USERNAME='root';
-var PASSWORD='123';
-
-var client=mysql.createClient({
-    user:USERNAME,
-    password:PASSWORD
-});
-client.query('use '+DATABASE_NAME);
 
 Db.prototype.getBy=function(field, value, orderby, limit, callback){
     var order='ASC';
@@ -40,13 +30,5 @@ Db.prototype.getBy=function(field, value, orderby, limit, callback){
         sql+=' limit '+limit[0]+','+limit[1];
     }
     console.log(sql+'   '+args);
-    client.query(sql, function selectCb(err, results, fields){
-        if (err){
-            console.log(err);
-        }
-        client.end();
-        console.log(results);
-        this.result=results;
-        callback(null, 1);
-    });
+    client.query(sql, callback);
 };
