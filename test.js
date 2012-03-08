@@ -1,2 +1,2 @@
-var Post=require('./model/post');
-Post.test2();
+var post=require('./model/post');
+post.getAll();

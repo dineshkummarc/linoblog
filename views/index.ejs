@@ -1,2 +1,13 @@
 TEST
 <%= title %>
+<br/>
+<ul>
+<%= posts %>
+<% for (k in posts){ %>
+<li>
+    <% for (pro in posts[k]) { %>
+        <%= posts[k][pro]%> 
+    <% } %>
+</li>
+<% } %>
+</ul>

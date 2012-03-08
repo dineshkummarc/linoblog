@@ -1,4 +1,6 @@
 var post=require("../model/post");
 exports.index = function(req, res){
-  res.render('index', { title: 'LinoBLog' })
+  post.getAll(function(err, results){
+    res.render('index', { title: 'LinoBLog' ,posts:results});
+  });
 };

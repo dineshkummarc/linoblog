@@ -1,4 +1,6 @@
-var client=require('../conf');
+var client=require('../conf'),
+    _=require('underscore');
+
 var Db = module.exports=function Db(tablename){
     this.tablename=tablename;
     this.results=[];
@@ -11,24 +13,53 @@ util.merge=function(toarray, witharray){
     }
 }
 
-Db.prototype.getBy=function(field, value, orderby, limit, callback){
-    var order='ASC';
-    var args=[];
-    var sql='select * from `'+this.tablename+'`';
-    if (field!=null){
-        sql+=' where '+field+'='+value;
+//TODO:SQLInjection prevent and enhencement
+Db.prototype.get=function(options, callback){
+    var opts={
+        fields:'',
+        where:[],
+        order:'',
+        limit:[]
     }
-    if (orderby!=null){
-        if (orderby.indexOf('-')==0){
-            order='DESC';
-            orderby=orderby.slice(1);
+
+    _.extend(opts, options);
+
+    var sql="select",
+        args=[];
+    if (opts['fields']==''){
+        sql+=' *';
+    }else{
+            sql+=' '+opts['fields'];
+    }
+
+    sql+=' from `'+this.tablename+'`';
+
+    if (opts['where'].length==2){
+        sql+=' where '+opts['where'][0]+'=?';
+        args.push(opts['where'][1]);
+    }
+
+    var o='ASC',
+        order=opts['order'];
+    if (order!=''){
+        if (order.indexOf('-')==0){
+            o='DESC';
+            order=order.slice(1);
         }
-        sql += ' order by '+ orderby+' '+order;
-        args.push(orderby);
+        sql += ' order by ? '+o;
+        args.push(order);
     }
-    if (limit!=null){
-        sql+=' limit '+limit[0]+','+limit[1];
+    
+    var limit=opts['limit'];
+    if (limit.length!=0){
+        sql+=' limit ?';
+        args.push(limit[0]);
+        if (limit.length==2){
+            sql+=', ?';
+            args.push(limit[1]);
+        }
     }
+
     console.log(sql+'   '+args);
-    client.query(sql, callback);
+    client.query(sql, args, callback);
 };
