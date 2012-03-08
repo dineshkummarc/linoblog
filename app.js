@@ -41,9 +41,10 @@ app.helpers({
 // Routes
 app.get('/', routes.index);
 app.get('/page/:pagenum?', routes.page);
-app.get('/post/:id', routes.post);
-app.get('/post/edit/:id', routes.admin.post);
-app.post('/post/edit/:id', routes.admin.editpost);
+app.get('/post/:id([0-9]+)', routes.post);
+app.get('/post/edit/:id([0-9]+)', routes.admin.post);
+app.post('/post/edit/:id([0-9]+)?', routes.admin.editpost);
+app.get('/post/new', routes.admin.newpost);
 
 app.listen(3000);
 console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);

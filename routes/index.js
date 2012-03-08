@@ -69,6 +69,10 @@ admin.post=function(req, res){
 admin.editpost=function(req, res){
   console.log(req.body);
   post.save(req.body, function(err, results){
-    res.redirect('/post/'+req.params.id);
+    res.redirect('/post/'+(results.insertId?results.insertId:req.params.id));
   });
+}
+
+admin.newpost=function(req, res){
+  res.render('newpost',{});
 }

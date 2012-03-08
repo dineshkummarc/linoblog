@@ -7,7 +7,9 @@ TEST
   <textarea id="content" name="content" rows="20" cols="30"><%= post.content %></textarea>
   </p>
   <p><input type="submit" value="Save"/></p>
-  <p><input type="hidden" name="id" value="<%= post.id %>"/></p>
+  <% if(post.id!=null){ %>
+    <p><input type="hidden" name="id" value="<%= post.id %>"/></p>
+  <% } %>
 </form>
 
 <% for (pro in post) { %>

@@ -36,7 +36,6 @@ Db.prototype.saveit=function(data, callback){
   client.query(sql, args, callback);
 }
 
-
 //TODO:SQLInjection prevent and enhencement
 Db.prototype.get=function(options, callback){
   var opts={
