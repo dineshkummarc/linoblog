@@ -12,7 +12,7 @@ var app = module.exports = express.createServer();
 
 app.configure(function(){
   app.set('views', __dirname + '/views');
-  app.set('view engine', 'jade');
+  app.set('view engine', 'ejs');
   app.set('view options',{
       layout:false
   });
@@ -34,8 +34,14 @@ app.dynamicHelpers({some:function(req, res){
     return "YES";
 }
 });
+
+app.helpers({
+  baseurl:"http://localhost:3000/",
+});
 // Routes
 app.get('/', routes.index);
+app.get('/page/:pagenum?', routes.page);
+app.get('/post/:id', routes.post);
 
 app.listen(3000);
 console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);

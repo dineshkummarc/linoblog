@@ -1,11 +1,20 @@
 var async=require('async'),
-    db=require('../conf');
+    Db=require('./db');
 
-var tname='post';
-//var db=new Db('post');
-var post={};
+var post=new Db('post');
 module.exports=post;
 
-post.getAll=function(callback){
-  db.query('select * from `'+tname+'`', callback);
-}
+post.getByMonth=function(month,callback){
+  this.get(
+    {
+      where:['month(pubdate)',month], 
+      order:'-id',
+    },callback);
+};
+
+post.getById=function(id, callback){
+  this.get({
+    where:{'id': id},
+    limit:[0,1],
+  },callback);
+};

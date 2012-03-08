@@ -2,12 +2,20 @@ TEST
 <%= title %>
 <br/>
 <ul>
-<%= posts %>
-<% for (k in posts){ %>
-<li>
-    <% for (pro in posts[k]) { %>
-        <%= posts[k][pro]%> 
-    <% } %>
-</li>
-<% } %>
+  <% for (k in posts){ %>
+  <li>
+  <a href="<%= baseurl %>post/<%= posts[k].id %>">
+  <% for (pro in posts[k]) { %>
+  <%= posts[k][pro]%> 
+  <% } %>
+  </a>
+  </li>
+  <% } %>
 </ul>
+<p>
+<% if (pgnum!=1){ %>
+<a href="<%= baseurl %>page/<%= +pgnum-1 %>">&lt</a>
+<% } %>
+<% if (pgnum!=pgtotal){ %>
+<a href="<%= baseurl %>page/<%= +pgnum+1 %>">&gt</a>
+<% } %>
