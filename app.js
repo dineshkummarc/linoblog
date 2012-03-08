@@ -39,6 +39,7 @@ app.dynamicHelpers({some:function(req, res){
 
 app.helpers({
   baseurl:"http://localhost:3000/",
+  adminurl:"http://localhost:3000/admin/",
 });
 
 function auth(req, res, next){
@@ -53,12 +54,13 @@ function auth(req, res, next){
 app.get('/', routes.index);
 app.get('/page/:pagenum?', routes.page);
 app.get('/post/:id([0-9]+)', routes.post);
-app.get('/post/edit/:id([0-9]+)', auth, routes.admin.post);
-app.post('/post/edit/:id([0-9]+)?', auth, routes.admin.editpost);
-app.get('/post/new', auth, routes.admin.newpost);
 app.get('/admin', routes.admin.admin);
 app.post('/login', routes.admin.login);
 app.get('/logout', routes.admin.logout);
+app.get('/admin/post/edit/:id([0-9]+)', auth, routes.admin.post);
+app.post('/admin/post/edit/:id([0-9]+)?', auth, routes.admin.editpost);
+app.get('/admin/post/new', auth, routes.admin.newpost);
+app.get('/admin/page/:pagenum?', auth, routes.admin.page);
 
 app.listen(3000);
 console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);

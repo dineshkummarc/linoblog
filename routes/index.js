@@ -51,7 +51,7 @@ exports.post=function(req, res){
       post: results[0],
     });
   });
-}
+};
 
 var admin={}
 exports.admin=admin;
@@ -61,26 +61,26 @@ admin.post=function(req, res){
     if(err){
       console.error(err);
     }
-    res.render('editpost', {
+    res.render('admin/editpost', {
       post: results[0],
     });
   });
-}
+};
 
 admin.editpost=function(req, res){
   console.log(req.body);
   post.save(req.body, function(err, results){
     res.redirect('/post/'+(results.insertId?results.insertId:req.params.id));
   });
-}
+};
 
 admin.newpost=function(req, res){
-  res.render('newpost',{});
-}
+  res.render('admin/newpost',{});
+};
 
 admin.admin=function(req, res){
-  res.render('admin', {});
-}
+  res.render('admin/admin', {});
+};
 
 admin.login=function(req, res){
   var sql='select `passwd` from `user` where name=?';
@@ -94,14 +94,47 @@ admin.login=function(req, res){
     var c = md5.digest('hex');
     if(results[0]!=null && c === results[0].passwd){
       req.session.user=req.body.name;
-      res.redirect('/post/new');
+      res.redirect('/admin/page');
     }else{
       res.redirect('/admin');
     }
   });
-}
+};
 
 admin.logout=function(req, res){
   delete(req.session.user);
   res.redirect('/admin');
-}
+};
+
+admin.page=function(req, res){
+  var pgnum=req.params.pagenum?req.params.pagenum:1
+  var start=(pgnum-1)*numperpage;
+  async.parallel({
+    posts:function(cb){
+            post.get({order:'-id', limit:[start, numperpage]}, function(err, results){
+              if(err){
+                console.error(err);
+              }
+              cb(null, results);
+            })
+          },
+    total:function(cb){
+            post.get({fields:'count(*)'}, function(err, results){
+              if(err){
+                console.error(err);
+              }
+              cb(null, results[0]);
+            })
+          },
+  },
+  function(err, results){
+    if(err){
+      console.error(err);
+    }
+    res.render('admin/index', {
+      title: 'LinoBLog',
+      posts:results.posts, 
+      pgtotal:Math.ceil(results.total['count(*)']/numperpage),
+      pgnum:pgnum});
+  });
+};
