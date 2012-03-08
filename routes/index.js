@@ -51,3 +51,24 @@ exports.post=function(req, res){
     });
   });
 }
+
+var admin={}
+exports.admin=admin;
+
+admin.post=function(req, res){
+  post.getById(req.params.id, function(err, results){
+    if(err){
+      console.error(err);
+    }
+    res.render('editpost', {
+      post: results[0],
+    });
+  });
+}
+
+admin.editpost=function(req, res){
+  console.log(req.body);
+  post.save(req.body, function(err, results){
+    res.redirect('/post/'+req.params.id);
+  });
+}

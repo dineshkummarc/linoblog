@@ -7,7 +7,36 @@ var Db = module.exports=function Db(tablename){
 };
 Db.client=client;
 
-//
+Db.prototype.saveit=function(data, callback){
+  if (typeof(data)!=='object'){   //TODO:FIXIT
+    process.exit();
+  }
+  var sql, args=[];
+  if (data.id==null){         //new record
+    sql='insert into `'+this.tablename+'` set ';
+    for (k in data){
+      sql+=k+'=?,';
+      args.push(data[k]);
+    }
+    sql=sql.slice(0, -1);
+  }else{                      //update record
+    sql='update `'+this.tablename+'` set ';
+    for (k in data){
+      if(k==='id'){
+        break;
+      }
+      sql+=k+'=?,';
+      args.push(data[k]);
+    }
+    sql=sql.slice(0, -1);
+    sql+=' where id=?';
+    args.push(data.id);
+  }
+  console.log(sql+'   '+args);
+  client.query(sql, args, callback);
+}
+
+
 //TODO:SQLInjection prevent and enhencement
 Db.prototype.get=function(options, callback){
   var opts={

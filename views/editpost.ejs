@@ -1,0 +1,17 @@
+TEST
+<br/>
+<form method="post" id="editpost" name="editpost" action="/post/edit/<%= post.id %>">
+  <label for="title">Title</label>
+  <input type="text" id="title" name="title" value="<%= post.title %>"/>
+  <p>
+  <textarea id="content" name="content" rows="20" cols="30"><%= post.content %></textarea>
+  </p>
+  <p><input type="submit" value="Save"/></p>
+  <p><input type="hidden" name="id" value="<%= post.id %>"/></p>
+</form>
+
+<% for (pro in post) { %>
+<p>
+<%= post[pro]%> 
+</p>
+<% } %>

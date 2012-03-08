@@ -18,3 +18,8 @@ post.getById=function(id, callback){
     limit:[0,1],
   },callback);
 };
+
+post.save=function(data, callback){
+//  this.constructor.prototype.save(data, callback);  //LoL
+  this.saveit(data, callback);  
+}
