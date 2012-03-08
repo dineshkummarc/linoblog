@@ -1,6 +1,7 @@
 var async=require('async');
 var conf=require('../conf').conf;
 var post=require("../model/post");
+var client=require('../conf').client;
 
 var numperpage=conf.numperpage;
 
@@ -75,4 +76,29 @@ admin.editpost=function(req, res){
 
 admin.newpost=function(req, res){
   res.render('newpost',{});
+}
+
+admin.admin=function(req, res){
+  res.render('admin', {});
+}
+
+admin.login=function(req, res){
+  var sql='select `passwd` from `user` where name=?';
+  client.query(sql, [req.body.name], function(err, results){
+    if(err){
+      console.error(err);
+    }
+    console.log(results);
+
+    var crypto=require('crypto');
+    var md5=crypto.createHash('md5');
+    md5.update(req.body.passwd);
+    var c = md5.digest('hex');
+    if(results[0]!=null && c === results[0].passwd){
+      req.session.user=req.body.name;
+      res.redirect('/post/new');
+    }else{
+      res.redirect('/admin');
+    }
+  });
 }
