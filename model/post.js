@@ -7,7 +7,7 @@ module.exports=post;
 post.getByMonth=function(month,callback){
   this.get(
     {
-      where:['month(pubdate)',month], 
+      where:{'month(pubdate)':month},
       order:'-id',
     },callback);
 };

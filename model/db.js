@@ -65,9 +65,10 @@ Db.prototype.get=function(options, callback){
   if(typeof(where)==='object' && where!=null){//TODO: FIXIT
     sql+=' where ';
     for (k in where){
-      sql+=k+'=?';
+      sql+=k+'=? and ';
       args.push(where[k]);
     }
+    sql=sql.slice(0, -4);
   }
 
   var o='ASC',

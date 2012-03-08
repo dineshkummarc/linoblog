@@ -1,0 +1,21 @@
+TEST
+<%= title %>
+<br/>
+<ul>
+  <% for (k in categories){ %>
+  <li>
+  <a href="<%= baseurl %>post/<%= categories[k].id %>">
+  <% for (pro in categories[k]) { %>
+  <%= categories[k][pro]%> 
+  <% } %>
+  </a>
+  </li>
+  <% } %>
+</ul>
+<p>
+<% if (pgnum!=1){ %>
+<a href="<%= baseurl %>category/<%= name %>/<%= +pgnum-1 %>">&lt</a>
+<% } %>
+<% if (pgnum!=pgtotal){ %>
+<a href="<%= baseurl %>category/<%= name %>/<%= +pgnum+1 %>">&gt</a>
+<% } %>

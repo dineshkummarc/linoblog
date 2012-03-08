@@ -2,7 +2,7 @@ var async=require('async'),
     Db=require('./db');
 
 var category=new Db('category');
-module.exports=post;
+module.exports=category;
 
 category.getById=function(id, callback){
   this.get({
@@ -11,7 +11,6 @@ category.getById=function(id, callback){
   },callback);
 };
 
-post.save=function(data, callback){
-//  this.constructor.prototype.save(data, callback);  //LoL
+category.save=function(data, callback){
   this.saveit(data, callback);  
 }

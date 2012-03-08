@@ -54,13 +54,17 @@ function auth(req, res, next){
 app.get('/', routes.index);
 app.get('/page/:pagenum?', routes.page);
 app.get('/post/:id([0-9]+)', routes.post);
-app.get('/admin', routes.admin.admin);
+app.get('/:year([0-9]+)/:month([0-9]+)/:pagenum([0-9]+)?', routes.month);
+app.get('/category/:name/:pagenum([0-9]+)?', routes.catepage);
+
 app.post('/login', routes.admin.login);
 app.get('/logout', routes.admin.logout);
+app.get('/admin', routes.admin.admin);
 app.get('/admin/post/edit/:id([0-9]+)', auth, routes.admin.post);
 app.post('/admin/post/edit/:id([0-9]+)?', auth, routes.admin.editpost);
 app.get('/admin/post/new', auth, routes.admin.newpost);
 app.get('/admin/page/:pagenum?', auth, routes.admin.page);
+
 
 app.listen(3000);
 console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
