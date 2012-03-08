@@ -88,8 +88,6 @@ admin.login=function(req, res){
     if(err){
       console.error(err);
     }
-    console.log(results);
-
     var crypto=require('crypto');
     var md5=crypto.createHash('md5');
     md5.update(req.body.passwd);
@@ -101,4 +99,9 @@ admin.login=function(req, res){
       res.redirect('/admin');
     }
   });
+}
+
+admin.logout=function(req, res){
+  delete(req.session.user);
+  res.redirect('/admin');
 }
