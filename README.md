@@ -2,4 +2,4 @@
 
 A little toy blog using NodeJS.
 
-Life is short and asyncronous programing makes it even shorter.
+Life is short and asynchronous programing makes it even shorter.
