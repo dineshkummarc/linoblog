@@ -1,12 +1,9 @@
-TEST
-<%= title %>
-<br/>
 <ul>
   <% for (k in posts){ %>
   <li>
-  <a href="<%= baseurl %>post/<%= posts[k].id %>">
+  <a href="<%= baseurl %><%= posts[k].pubdate.getFullYear() %>/<%= posts[k].pubdate.getMonth()+1 %>/<%= posts[k].title %>">
   <% for (pro in posts[k]) { %>
-  <%= posts[k][pro]%> 
+  <%= posts[k][pro]%>
   <% } %>
   </a>
   </li>

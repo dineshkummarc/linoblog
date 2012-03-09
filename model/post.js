@@ -1,5 +1,6 @@
 var async=require('async'),
-    Db=require('./db');
+    Db=require('./db'),
+    client=require('../conf').client;
 
 var post=new Db('post');
 module.exports=post;
@@ -13,10 +14,8 @@ post.getByMonth=function(month,callback){
 };
 
 post.getById=function(id, callback){
-  this.get({
-    where:{'id': id},
-    limit:[0,1],
-  },callback);
+  client.query('select * from'
+  ,callback);
 };
 
 post.save=function(data, callback){

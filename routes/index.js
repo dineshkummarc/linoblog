@@ -1,10 +1,37 @@
 var async=require('async');
 var conf=require('../conf').conf;
-var post=require("../model/post");
-var category=require("../model/category");
 var client=require('../conf').client;
 
 var numperpage=conf.numperpage;
+
+function save(tablename, data, callback){
+  if (typeof(data)!=='object'){   //TODO:FIXIT
+    return '500';
+  }
+  var sql, args=[];
+  if (data.id==null){         //new record
+    sql='insert into `'+tablename+'` set ';
+    for (k in data){
+      sql+=k+'=?,';
+      args.push(data[k]);
+    }
+    sql=sql.slice(0, -1);
+  }else{                      //update record
+    sql='update `'+tablename+'` set ';
+    for (k in data){
+      if(k==='id'){
+        break;
+      }
+      sql+=k+'=?,';
+      args.push(data[k]);
+    }
+    sql=sql.slice(0, -1);
+    sql+=' where id=?';
+    args.push(data.id);
+  }
+  console.log(sql+'   '+args);
+  client.query(sql, args, callback);
+}
 
 exports.index = function(req, res){
   exports.page(req, res);
@@ -18,9 +45,7 @@ exports.page= function(req, res){
         if(err){
           console.error(err);
         }
-        console.log(results);
         res.render('index', {
-          title: 'LinoBLog',
           posts:results,
           pgtotal:Math.ceil(results[0].total/numperpage),
           pgnum:pgnum});
@@ -28,34 +53,80 @@ exports.page= function(req, res){
 };
 
 exports.post=function(req, res){
-  post.getById(req.params.id, function(err, results){
-    if(err){
-      console.error(err);
-    }
-    res.render('post', {
-      post: results[0],
-    });
-  });
+  client.query('select post.*, category.name from `post`, `category` where month(post.pubdate)=? and year(post.pubdate)=? and post.title=? and post.category_id=category.id', [req.params.month, req.params.year, req.params.title],
+      function(err, results){
+        if(err){
+          console.error(err);
+        }
+        res.render('post', {
+          post:results[0]
+        });
+      });
 };
 
-var admin={}
+exports.catepage=function(req, res){
+  var pgnum=req.params.pagenum?req.params.pagenum:1;
+  var start=(pgnum-1)*numperpage;
+  client.query('select post.*, category.name, (select count(*) from post where name=?) as total from post, category where category_id=(select id from category where name=?) and category_id=category.id order by pubdate DESC limit ?,?', [req.params.name, req.params.name, start, numperpage],
+      function(err, results){
+        if(err){
+          console.error(err);
+        }
+        res.render('catepage', {
+          name: req.params.name,
+        posts:results,
+        pgtotal:Math.ceil(results[0].total/numperpage),
+        pgnum:pgnum});
+      });
+};
+
+exports.month=function(req, res){
+  var pgnum=req.params.pagenum?req.params.pagenum:1;
+  var start=(pgnum-1)*numperpage;
+  client.query('select post.*, category.name, (select count(*) from post where month(pubdate)=? and year(pubdate)=?) as total from post, category where month(pubdate)=? and year(pubdate)=? order by pubdate DESC limit ?,?', [req.params.month, req.params.year,req.params.month, req.params.year, start, numperpage],
+      function(err, results){
+        if(err || results.length===0){
+          console.error(err);
+          return "404";
+        }
+        res.render('month', {
+          month:req.params.month,
+        year:req.params.year,
+        posts:results,
+        pgtotal:Math.ceil(results[0].total/numperpage),
+        pgnum:pgnum});
+      });
+};
+
+var admin={};
 exports.admin=admin;
 
 admin.post=function(req, res){
-  post.getById(req.params.id, function(err, results){
-    if(err){
-      console.error(err);
-    }
-    res.render('admin/editpost', {
-      post: results[0],
-    });
-  });
+  client.query('select post.*, category.name from `post`, `category` where post.category_id=category.id and post.id='+req.params.id,
+      function(err, results){
+        if(err){
+          console.error(err);
+        }
+        res.render('admin/editpost', {
+          post: results[0],
+        });
+      });
 };
 
 admin.editpost=function(req, res){
   console.log(req.body);
-  post.save(req.body, function(err, results){
-    res.redirect('/post/'+(results.insertId?results.insertId:req.params.id));
+  save('post', req.body, function(err, results){
+    if(err){
+      console.error(err);
+    }
+    console.log(results);
+    client.query('select title, pubdate from `post` where id=?', [results.insertId?results.insertId:req.params.id],
+      function(err, r){
+        if(err){
+          console.error(err);
+        }
+        res.redirect('/'+r[0].pubdate.getFullYear()+'/'+(r[0].pubdate.getMonth()+1)+'/'+r[0].title);
+      });
   });
 };
 
@@ -91,117 +162,17 @@ admin.logout=function(req, res){
   res.redirect('/admin');
 };
 
-admin.page=function(req, res){
-  var pgnum=req.params.pagenum?req.params.pagenum:1
-    var start=(pgnum-1)*numperpage;
-  async.parallel({
-    posts:function(cb){
-      post.get({order:'-id', limit:[start, numperpage]}, function(err, results){
-        if(err){
-          console.error(err);
-        }
-        cb(null, results);
-      })
-    },
-    total:function(cb){
-      post.get({fields:'count(*)'}, function(err, results){
-        if(err){
-          console.error(err);
-        }
-        cb(null, results[0]);
-      })
-    },
-  },
-  function(err, results){
-    if(err){
-      console.error(err);
-    }
-    res.render('admin/index', {
-      title: 'LinoBLog',
-    posts:results.posts, 
-    pgtotal:Math.ceil(results.total['count(*)']/numperpage),
-    pgnum:pgnum});
-  });
-};
-
-exports.catepage=function(req, res){
-  var pgnum=req.params.pagenum?req.params.pagenum:1;
+admin.page=function(req, res){ 
+  var pgnum=req.params.pagenum?+req.params.pagenum:1;
   var start=(pgnum-1)*numperpage;
-  var cateid;
-  async.series({
-    category_id: function(cb){
-      category.get({where:{name:req.params.name}}, function(err, results){
+  client.query('select post.*, category.name, (select count(*) from post) as total  FROM `post`,`category` where post.category_id=category.id order by pubdate DESC limit ?,?', [start,numperpage], 
+      function(err, results){
         if(err){
           console.error(err);
         }
-        console.log(results);
-        cateid=results[0].id;
-        cb(null,results);
-      })
-    },
-    categories:function(cb){
-      post.get({order:'-id', limit:[start, numperpage], where:{category_id:cateid}}, function(err, results){
-        if(err){
-          console.error(err);
-        }
-        cb(null, results);
-      })
-    },
-    total:function(cb){
-      post.get({fields:'count(*)', where:{category_id:cateid}}, function(err, results){
-        if(err){
-          console.error(err);
-        }
-        cb(null, results[0]);
-      })
-    },
-  },
-    function(err, results){
-      if(err){
-        console.error(err);
-      }
-      res.render('catepage', {
-        title: 'LinoBLog',
-      name: req.params.name,
-      categories:results.categories, 
-      pgtotal:Math.ceil(results.total['count(*)']/numperpage),
-      pgnum:pgnum});
-    });
-};
-
-exports.month=function(req, res){
-  var pgnum=req.params.pagenum?req.params.pagenum:1;
-  var start=(pgnum-1)*numperpage;
-  async.parallel({
-    posts:function(cb){
-      post.get({where:{'month(pubdate)':req.params.month,'year(pubdate)':req.params.year},
-        order:'-id', limit:[start, numperpage]}, function(err, results){
-        if(err){
-          console.error(err);
-        }
-        cb(null, results);
+        res.render('admin/index', {
+          posts:results,
+          pgtotal:Math.ceil(results[0].total/numperpage),
+          pgnum:pgnum});
       });
-    },
-    total:function(cb){
-      post.get({where:{'month(pubdate)':req.params.month,'year(pubdate)':req.params.year},
-        fields:'count(*)'}, function(err, results){
-        if(err){
-          console.error(err);
-        }
-        cb(null, results[0]);
-      });
-    },
-  },
-  function(err, results){
-    if(err){
-      console.error(err);
-    }
-    res.render('month', {
-      title: 'LinoBLog',
-    month:req.params.month,
-    year:req.params.year,
-    posts:results.posts, 
-    pgtotal:Math.ceil(results.total['count(*)']/numperpage),
-    pgnum:pgnum});
-  });
 };

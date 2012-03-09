@@ -53,8 +53,8 @@ function auth(req, res, next){
 // Routes
 app.get('/', routes.index);
 app.get('/page/:pagenum?', routes.page);
-app.get('/post/:id([0-9]+)', routes.post);
 app.get('/:year([0-9]+)/:month([0-9]+)/:pagenum([0-9]+)?', routes.month);
+app.get('/:year([0-9]+)/:month([0-9]+)/:title', routes.post);
 app.get('/category/:name/:pagenum([0-9]+)?', routes.catepage);
 
 app.post('/login', routes.admin.login);
