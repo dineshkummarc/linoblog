@@ -14,6 +14,7 @@ client.query('use '+dbconf['DATABASE_NAME'], function(err){if(err)console.error(
 var conf={
   blogname:"MY BLOG",
   numperpage:5,
+  adminnumperpage:20,
 };
 
 module.exports.client=client;

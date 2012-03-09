@@ -81,11 +81,11 @@ function linodata(req, res, next){
 }
 
 // Routes
-app.get('/', routes.index);
+app.get('/', linodata, routes.index);
 app.get('/page/:pagenum?', linodata, routes.page);
-app.get('/:year([0-9]+)/:month([0-9]+)/:pagenum([0-9]+)?', routes.month);
-app.get('/:year([0-9]+)/:month([0-9]+)/:title', routes.post);
-app.get('/category/:name/:pagenum([0-9]+)?', routes.catepage);
+app.get('/:year([0-9]+)/:month([0-9]+)/:pagenum([0-9]+)?', linodata, routes.month);
+app.get('/:year([0-9]+)/:month([0-9]+)/:title', linodata, routes.post);
+app.get('/category/:name/:pagenum([0-9]+)?', linodata, routes.catepage);
 
 app.post('/login', routes.admin.login);
 app.get('/logout', routes.admin.logout);

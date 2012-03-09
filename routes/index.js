@@ -3,6 +3,7 @@ var conf=require('../conf').conf;
 var client=require('../conf').client;
 
 var numperpage=conf.numperpage;
+var adminnumperpage=conf.adminnumperpage;
 
 function save(tablename, data, callback){
   if (typeof(data)!=='object'){   //TODO:FIXIT
@@ -160,7 +161,7 @@ admin.editpost=function(req, res){
       console.error(err);
     }
     console.log(results);
-    client.query('select title, pubdate from `post` where id=?', [results.insertId?results.insertId:req.params.id],
+    client.query('select title, pubdate from `post` where id=?', [results.insertId?results.insertId:req.body.id],
       function(err, r){
         if(err){
           console.error(err);
@@ -203,22 +204,22 @@ admin.newpost=function(req, res){
 
 admin.page=function(req, res){ 
   var pgnum=req.params.pagenum?+req.params.pagenum:1;
-  var start=(pgnum-1)*numperpage;
-  client.query('select post.*, category.name, (select count(*) from post) as total  FROM `post`,`category` where post.category_id=category.id order by pubdate DESC limit ?,?', [start,numperpage], 
+  var start=(pgnum-1)*adminnumperpage;
+  client.query('select post.*, category.name, (select count(*) from post) as total  FROM `post`,`category` where post.category_id=category.id order by pubdate DESC limit ?,?', [start,adminnumperpage], 
       function(err, results){
         if(err){
           console.error(err);
         }
         res.render('admin/index', {
           posts:results,
-          pgtotal:Math.ceil(results[0].total/numperpage),
+          pgtotal:Math.ceil(results[0].total/adminnumperpage),
           pgnum:pgnum});
       });
 };
 
 admin.catepage= function(req, res){
   var pgnum=req.params.pagenum?+req.params.pagenum:1;
-  var start=(pgnum-1)*numperpage;
+  var start=(pgnum-1)*adminnumperpage;
   client.query('select *, (select count(*) from `category`) as total from `category` order by id',
       function(err, results){
         if(err){
@@ -226,7 +227,7 @@ admin.catepage= function(req, res){
         }
         res.render('admin/category', {
           categories:results,
-          pgtotal:Math.ceil(results[0].total/numperpage),
+          pgtotal:Math.ceil(results[0].total/adminnumperpage),
           pgnum:pgnum});
   });
 };
