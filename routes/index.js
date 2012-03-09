@@ -30,7 +30,7 @@ function save(tablename, data, callback){
     sql+=' where id=?';
     args.push(data.id);
   }
-  console.log(sql+'   '+args);
+  //console.log(sql+'   '+args);
   client.query(sql, args, callback);
 }
 
@@ -145,7 +145,7 @@ admin.post=function(req, res){
           if(err){
             console.error(err);
           }
-          console.log(results, r);
+          //console.log(results, r);
           res.render('admin/editpost', {
             post: results[0],
           categories: r,
@@ -155,12 +155,12 @@ admin.post=function(req, res){
 };
 
 admin.editpost=function(req, res){
-  console.log(req.body);
+  //console.log(req.body);
   save('post', req.body, function(err, results){
     if(err){
       console.error(err);
     }
-    console.log(results);
+    //console.log(results);
     client.query('select title, pubdate from `post` where id=?', [results.insertId?results.insertId:req.body.id],
       function(err, r){
         if(err){
@@ -245,12 +245,12 @@ admin.category=function(req, res){
 };
 
 admin.editcate=function(req, res){
-  console.log(req.body);
+  //console.log(req.body);
   save('category', req.body, function(err, results){
     if(err){
       console.error(err);
     }
-    console.log(results);
+    //console.log(results);
     res.redirect('/admin/category');
   });
 };
