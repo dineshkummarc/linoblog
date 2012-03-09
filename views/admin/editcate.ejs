@@ -3,4 +3,13 @@
   <input type="text" id="name" name="name" value="<%= category.name%>"/>
   <p><input type="submit" value="Save"/></p>
   <p><input type="hidden" name="id" value="<%= category.id %>"/></p>
+  <% if(category.id!=1){ %>
+  <p><input type="button" value="Delete" onClick="del();"/></p>
+  <script>
+    function del(){
+      document.getElementById('editcate').action="/admin/category/delete";
+      document.getElementById('editcate').submit();
+    }
+  </script>
+  <% } %>
 </form>

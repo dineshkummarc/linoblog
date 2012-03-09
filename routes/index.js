@@ -101,6 +101,38 @@ exports.month=function(req, res){
 var admin={};
 exports.admin=admin;
 
+admin.admin=function(req, res){
+  if(req.session.user!=null){
+    res.redirect('/admin/page');
+    return;
+  }
+  res.render('admin/admin', {});
+};
+
+admin.login=function(req, res){
+  var sql='select `passwd` from `user` where name=?';
+  client.query(sql, [req.body.name], function(err, results){
+    if(err){
+      console.error(err);
+    }
+    var crypto=require('crypto');
+    var md5=crypto.createHash('md5');
+    md5.update(req.body.passwd);
+    var c = md5.digest('hex');
+    if(results[0]!=null && c === results[0].passwd){
+      req.session.user=req.body.name;
+      res.redirect('/admin/page');
+    }else{
+      res.redirect('/admin');
+    }
+  });
+};
+
+admin.logout=function(req, res){
+  delete(req.session.user);
+  res.redirect('/admin');
+};
+
 admin.post=function(req, res){
   client.query('select post.*, category.name from `post`, `category` where post.category_id=category.id and post.id='+req.params.id,
       function(err, results){
@@ -137,40 +169,35 @@ admin.editpost=function(req, res){
   });
 };
 
-admin.newpost=function(req, res){
-  res.render('admin/newpost',{});
+admin.deletepost=function(req, res){
+  client.query('delete from `post` where id=?', [req.body.id],
+      function(err, r){
+        if(err){
+          console.error(err);
+        }
+        res.redirect('/admin/page');
+        return;
+      });
 };
 
-admin.admin=function(req, res){
-  if(req.session.user!=null){
+admin.batchdeletepost=function(req, res){
+  if(req.body.deleteid==null){
     res.redirect('/admin/page');
     return;
   }
-  res.render('admin/admin', {});
-};
+  var ids = req.body.deleteid.join(',');
+  client.query('delete from `post` where id in ('+ids+')', 
+        function(err, results){
+          if(err){
+            console.error(err);
+          }
+          res.redirect('/admin/page');
+          return;
+        });
+      };
 
-admin.login=function(req, res){
-  var sql='select `passwd` from `user` where name=?';
-  client.query(sql, [req.body.name], function(err, results){
-    if(err){
-      console.error(err);
-    }
-    var crypto=require('crypto');
-    var md5=crypto.createHash('md5');
-    md5.update(req.body.passwd);
-    var c = md5.digest('hex');
-    if(results[0]!=null && c === results[0].passwd){
-      req.session.user=req.body.name;
-      res.redirect('/admin/page');
-    }else{
-      res.redirect('/admin');
-    }
-  });
-};
-
-admin.logout=function(req, res){
-  delete(req.session.user);
-  res.redirect('/admin');
+admin.newpost=function(req, res){
+  res.render('admin/newpost',{});
 };
 
 admin.page=function(req, res){ 
@@ -222,10 +249,31 @@ admin.editcate=function(req, res){
       console.error(err);
     }
     console.log(results);
-    res.redirect('/admin/category/');
+    res.redirect('/admin/category');
   });
 };
 
 admin.newcate=function(req, res){
   res.render('admin/newcate',{});
+};
+
+admin.deletecate=function(req, res){
+  if(req.body.id==1){
+    res.redirect('back');
+    return;
+  }
+  client.query('update `post` set category_id=1 where category_id=?', [req.body.id],
+      function(err, results){
+        if(err){
+          console.error(err);
+        }
+        client.query('delete from `category` where id=?', [req.body.id],
+          function(err, r){
+            if(err){
+              console.error(err);
+            }
+            res.redirect('/admin/category');
+            return;
+          });
+      });
 };

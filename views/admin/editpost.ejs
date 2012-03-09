@@ -13,4 +13,12 @@ TEST
   </select>
   <p><input type="submit" value="Save"/></p>
   <p><input type="hidden" name="id" value="<%= post.id %>"/></p>
+   <p><input type="button" value="Delete" onClick="del();"/></p>
+  <script>
+    function del(){
+      document.getElementById('editpost').action="/admin/post/delete";
+      document.getElementById('editpost').submit();
+    }
+  </script>
+
 </form>

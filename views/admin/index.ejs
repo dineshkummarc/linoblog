@@ -1,15 +1,18 @@
+<form method="post" action="/admin/post/batchdelete">
 <ul>
   <% for (k in posts){ %>
   <li>
   <a href="<%= adminurl %>post/edit/<%= posts[k].id %>">
   <% for (pro in posts[k]) { %>
-  <%= posts[k][pro]%> 
+  <%= posts[k][pro]%>
   <% } %>
   </a>
+  <input type="checkbox" name="deleteid[]" value="<%= posts[k].id %>" />
   </li>
   <% } %>
 </ul>
-<p>
+<input type="submit" value="Delete" />
+</form>
 <% if (pgnum!=1){ %>
 <a href="<%= adminurl %>page/<%= +pgnum-1 %>">&lt</a>
 <% } %>

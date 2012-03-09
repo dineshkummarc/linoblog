@@ -65,12 +65,15 @@ app.get('/admin/page/:pagenum([0-9]+)?', auth, routes.admin.page);
 app.get('/admin/post/new', auth, routes.admin.newpost);
 app.get('/admin/post/edit/:id([0-9]+)', auth, routes.admin.post);
 app.post('/admin/post/edit/:id([0-9]+)?', auth, routes.admin.editpost);
+app.post('/admin/post/delete', auth, routes.admin.deletepost);
+app.post('/admin/post/batchdelete', auth, routes.admin.batchdeletepost);
 
 //app.get('/admin/category/:pagenum([0-9]+)?', auth, routes.admin.catepage);
 app.get('/admin/category', auth, routes.admin.catepage);
 app.get('/admin/category/new', auth, routes.admin.newcate);
 app.get('/admin/category/edit/:id([0-9]+)', auth, routes.admin.category);
 app.post('/admin/category/edit/:id([0-9]+)?', auth, routes.admin.editcate);
+app.post('/admin/category/delete', auth, routes.admin.deletecate);
 
 app.listen(3000);
 console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
