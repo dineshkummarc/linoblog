@@ -48,7 +48,8 @@ exports.page= function(req, res){
         res.render('index', {
           posts:results,
           pgtotal:Math.ceil(results[0].total/numperpage),
-          pgnum:pgnum});
+          pgnum:pgnum,
+        });
   });
 };
 

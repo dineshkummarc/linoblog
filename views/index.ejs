@@ -16,3 +16,11 @@
 <% if (pgnum!=pgtotal){ %>
 <a href="<%= baseurl %>page/<%= +pgnum+1 %>">&gt</a>
 <% } %>
+
+<% for(k in ym){ %>
+<li><%= ym[k].year %> <%= ym[k].month %></li>
+<% } %>
+
+<% for(k in cates){ %>
+<li><%= cates[k].name %></li>
+<% } %>

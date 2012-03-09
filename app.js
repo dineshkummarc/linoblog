@@ -4,7 +4,10 @@
  */
 
 var express = require('express')
-  , routes = require('./routes');
+  , routes = require('./routes')
+  , async = require('async')
+  , client = require('./conf').client;
+
 
 var app = module.exports = express.createServer();
 
@@ -50,9 +53,36 @@ function auth(req, res, next){
   }
 }
 
+function linodata(req, res, next){
+  async.parallel({
+    ym:function(cb){
+         client.query('SELECT YEAR(pubdate) as year,MONTH(pubdate) as month FROM `post` group by YEAR(pubdate), MONTH(pubdate) order by pubdate DESC',
+           function(err, r){
+             app.helpers({
+               ym:r,
+             });
+             cb(null, r);
+           });
+       },
+    cates:function(cb){
+            client.query('select * from `category`',
+              function(err, r){
+                cb(null, r);
+              });
+          },
+  },
+  function(err, r){
+    app.helpers({
+      ym:r['ym'],
+    cates:r['cates'],
+    });
+    next();
+  });
+}
+
 // Routes
 app.get('/', routes.index);
-app.get('/page/:pagenum?', routes.page);
+app.get('/page/:pagenum?', linodata, routes.page);
 app.get('/:year([0-9]+)/:month([0-9]+)/:pagenum([0-9]+)?', routes.month);
 app.get('/:year([0-9]+)/:month([0-9]+)/:title', routes.post);
 app.get('/category/:name/:pagenum([0-9]+)?', routes.catepage);
