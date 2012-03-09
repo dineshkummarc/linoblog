@@ -1,0 +1,11 @@
+<ul>
+  <% for (k in categories){ %>
+  <li>
+  <a href="<%= adminurl %>category/edit/<%= categories[k].id %>">
+  <% for (pro in categories[k]) { %>
+  <%= categories[k][pro]%>
+  <% } %>
+  </a>
+  </li>
+  <% } %>
+</ul>

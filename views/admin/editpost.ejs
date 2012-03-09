@@ -6,8 +6,11 @@ TEST
   <p>
   <textarea id="content" name="content" rows="20" cols="30"><%= post.content %></textarea>
   </p>
+  <select name="category_id", id="category_id">
+    <% for (k in categories){ %>
+    <option value="<%= categories[k].id %>" <% if(categories[k].id==post.category_id){ %>selected<% } %>><%= categories[k].name %></option>
+    <% } %>
+  </select>
   <p><input type="submit" value="Save"/></p>
-  <% if(post.id!=null){ %>
-    <p><input type="hidden" name="id" value="<%= post.id %>"/></p>
-  <% } %>
+  <p><input type="hidden" name="id" value="<%= post.id %>"/></p>
 </form>

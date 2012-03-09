@@ -107,8 +107,15 @@ admin.post=function(req, res){
         if(err){
           console.error(err);
         }
-        res.render('admin/editpost', {
-          post: results[0],
+        client.query('select * from category', function(err, r){
+          if(err){
+            console.error(err);
+          }
+          console.log(results, r);
+          res.render('admin/editpost', {
+            post: results[0],
+          categories: r,
+          });
         });
       });
 };
@@ -135,6 +142,10 @@ admin.newpost=function(req, res){
 };
 
 admin.admin=function(req, res){
+  if(req.session.user!=null){
+    res.redirect('/admin/page');
+    return;
+  }
   res.render('admin/admin', {});
 };
 
@@ -175,4 +186,46 @@ admin.page=function(req, res){
           pgtotal:Math.ceil(results[0].total/numperpage),
           pgnum:pgnum});
       });
+};
+
+admin.catepage= function(req, res){
+  var pgnum=req.params.pagenum?+req.params.pagenum:1;
+  var start=(pgnum-1)*numperpage;
+  client.query('select *, (select count(*) from `category`) as total from `category` order by id',
+      function(err, results){
+        if(err){
+          console.error(err);
+        }
+        res.render('admin/category', {
+          categories:results,
+          pgtotal:Math.ceil(results[0].total/numperpage),
+          pgnum:pgnum});
+  });
+};
+
+admin.category=function(req, res){
+  client.query('select * from `category` where id=?', [req.params.id],
+      function(err, results){
+        if(err){
+          console.error(err);
+        }
+        res.render('admin/editcate', {
+          category: results[0],
+        });
+      });
+};
+
+admin.editcate=function(req, res){
+  console.log(req.body);
+  save('category', req.body, function(err, results){
+    if(err){
+      console.error(err);
+    }
+    console.log(results);
+    res.redirect('/admin/category/');
+  });
+};
+
+admin.newcate=function(req, res){
+  res.render('admin/newcate',{});
 };
