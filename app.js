@@ -7,8 +7,7 @@ var express = require('express')
   , routes = require('./routes')
   , async = require('async')
   , NotFound= require('./error').NotFound
-  , client = require('./conf').client
-  , mongoStore = require('connect-mongodb');
+  , client = require('./conf').client;
 
 var app = module.exports = express.createServer();
 
