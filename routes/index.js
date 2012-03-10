@@ -1,9 +1,17 @@
 var async=require('async');
 var conf=require('../conf').conf;
 var client=require('../conf').client;
-
+var inspect=require('util').inspect;
 var numperpage=conf.numperpage;
 var adminnumperpage=conf.adminnumperpage;
+var NotFound=require('../error').NotFound;
+
+function isEmpty(obj){
+  for(var name in obj){
+    return false;
+  }
+  return true;
+}
 
 function save(tablename, data, callback){
   if (typeof(data)!=='object'){   //TODO:FIXIT
@@ -38,13 +46,17 @@ exports.index = function(req, res){
   exports.page(req, res);
 };
 
-exports.page= function(req, res){
+exports.page= function(req, res, next){
   var pgnum=req.params.pagenum?+req.params.pagenum:1;
   var start=(pgnum-1)*numperpage;
   client.query('select post.*, category.name, (select count(*) from post) as total  FROM `post`,`category` where post.category_id=category.id order by pubdate DESC limit '+start+','+numperpage, 
       function(err, results){
         if(err){
           console.error(err);
+        }
+        if(results.length==0){
+          next(new NotFound);
+          return;
         }
         res.render('index', {
           posts:results,
@@ -54,11 +66,15 @@ exports.page= function(req, res){
   });
 };
 
-exports.post=function(req, res){
+exports.post=function(req, res, next){
   client.query('select post.*, category.name from `post`, `category` where month(post.pubdate)=? and year(post.pubdate)=? and post.title=? and post.category_id=category.id', [req.params.month, req.params.year, req.params.title],
       function(err, results){
         if(err){
           console.error(err);
+        }
+        if(results.length==0){
+          next(new NotFound);
+          return;
         }
         res.render('post', {
           post:results[0]
@@ -74,6 +90,10 @@ exports.catepage=function(req, res){
         if(err){
           console.error(err);
         }
+        if(results.length==0){
+          next(new NotFound);
+          return;
+        }
         res.render('catepage', {
           name: req.params.name,
         posts:results,
@@ -82,14 +102,17 @@ exports.catepage=function(req, res){
       });
 };
 
-exports.month=function(req, res){
+exports.month=function(req, res, next){
   var pgnum=req.params.pagenum?req.params.pagenum:1;
   var start=(pgnum-1)*numperpage;
   client.query('select post.*, category.name, (select count(*) from post where month(pubdate)=? and year(pubdate)=?) as total from post, category where month(pubdate)=? and year(pubdate)=? order by pubdate DESC limit ?,?', [req.params.month, req.params.year,req.params.month, req.params.year, start, numperpage],
       function(err, results){
-        if(err || results.length===0){
+        if(err){
           console.error(err);
-          return "404";
+        }
+        if(results.length==0){
+          next(new NotFound);
+          return;
         }
         res.render('month', {
           month:req.params.month,
@@ -135,11 +158,15 @@ admin.logout=function(req, res){
   res.redirect('/admin');
 };
 
-admin.post=function(req, res){
+admin.post=function(req, res, next){
   client.query('select post.*, category.name from `post`, `category` where post.category_id=category.id and post.id='+req.params.id,
       function(err, results){
         if(err){
           console.error(err);
+        }
+        if(results.length==0){
+          next(new NotFound);
+          return;
         }
         client.query('select * from category', function(err, r){
           if(err){
@@ -202,13 +229,17 @@ admin.newpost=function(req, res){
   res.render('admin/newpost',{});
 };
 
-admin.page=function(req, res){ 
+admin.page=function(req, res, next){ 
   var pgnum=req.params.pagenum?+req.params.pagenum:1;
   var start=(pgnum-1)*adminnumperpage;
   client.query('select post.*, category.name, (select count(*) from post) as total  FROM `post`,`category` where post.category_id=category.id order by pubdate DESC limit ?,?', [start,adminnumperpage], 
       function(err, results){
         if(err){
           console.error(err);
+        }
+        if(results.length==0){
+          next(new NotFound);
+          return;
         }
         res.render('admin/index', {
           posts:results,
@@ -217,13 +248,17 @@ admin.page=function(req, res){
       });
 };
 
-admin.catepage= function(req, res){
+admin.catepage= function(req, res, next){
   var pgnum=req.params.pagenum?+req.params.pagenum:1;
   var start=(pgnum-1)*adminnumperpage;
   client.query('select *, (select count(*) from `category`) as total from `category` order by id',
       function(err, results){
         if(err){
           console.error(err);
+        }
+        if(results.length==0){
+          next(new NotFound);
+          return;
         }
         res.render('admin/category', {
           categories:results,
@@ -232,11 +267,15 @@ admin.catepage= function(req, res){
   });
 };
 
-admin.category=function(req, res){
+admin.category=function(req, res, next){
   client.query('select * from `category` where id=?', [req.params.id],
       function(err, results){
         if(err){
           console.error(err);
+        }
+        if(results.length==0){
+          next(new NotFound);
+          return;
         }
         res.render('admin/editcate', {
           category: results[0],

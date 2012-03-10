@@ -6,8 +6,9 @@
 var express = require('express')
   , routes = require('./routes')
   , async = require('async')
-  , client = require('./conf').client;
-
+  , NotFound= require('./error').NotFound
+  , client = require('./conf').client
+  , mongoStore = require('connect-mongodb');
 
 var app = module.exports = express.createServer();
 
@@ -19,12 +20,14 @@ app.configure(function(){
   app.set('view options',{
       layout:false
   });
+  app.use(express.static(__dirname + '/public'));
   app.use(express.bodyParser());
   app.use(express.methodOverride());
   app.use(express.cookieParser());
   app.use(express.session({ secret: "keyboard cat" }));
   app.use(app.router);
-  app.use(express.static(__dirname + '/public'));
+
+
 });
 
 app.configure('development', function(){
@@ -32,8 +35,33 @@ app.configure('development', function(){
 });
 
 app.configure('production', function(){
-  app.use(express.errorHandler());
+  /*app.use(express.session({ store: mongoStore(app.set('db-uri')), secret: 'topsecret' }));
+  app.set('db-uri', 'mongodb://localhost/test');
+  app.set('view options', {
+    pretty: true
+  }); 
+  app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
+
+  app.use(express.errorHandler()); */
 });
+
+app.error(function(err, req, res, next) {
+  if (err instanceof NotFound) {
+    res.render('404', { status: 404 });
+  } else {
+    next(err);
+  }
+});
+
+app.error(function(err, req, res) {
+  res.render('500', {
+    status: 500,
+    locals: {
+      error: err
+    } 
+  });
+});
+
 
 app.dynamicHelpers({some:function(req, res){
     return "YES";
@@ -78,7 +106,7 @@ function linodata(req, res, next){
     });
     next();
   });
-}
+};
 
 // Routes
 app.get('/', linodata, routes.index);
@@ -104,6 +132,8 @@ app.get('/admin/category/new', auth, routes.admin.newcate);
 app.get('/admin/category/edit/:id([0-9]+)', auth, routes.admin.category);
 app.post('/admin/category/edit/:id([0-9]+)?', auth, routes.admin.editcate);
 app.post('/admin/category/delete', auth, routes.admin.deletecate);
+
+app.all('*', function(req, res, next){next(new NotFound)});
 
 app.listen(3000);
 console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
